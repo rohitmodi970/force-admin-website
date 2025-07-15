@@ -32,7 +32,11 @@ export async function POST(request: NextRequest) {
       searchCriteria.email = email.toLowerCase();
     }
     if (userId) {
-      searchCriteria.userId = userId;
+      // Convert userId to number for numeric search
+      const numericUserId = parseInt(userId);
+      if (!isNaN(numericUserId)) {
+        searchCriteria.userId = numericUserId;
+      }
     }
 
     // Find user by email or userId

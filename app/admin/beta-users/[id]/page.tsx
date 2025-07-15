@@ -286,25 +286,25 @@ const BetaUserDetailPage = () => {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Created At</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(user.createdAt).toLocaleDateString('en-US', {
+                  {(user as any).createdAt ? new Date((user as any).createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                  })}
+                  }) : 'Not available'}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {new Date(user.updatedAt).toLocaleDateString('en-US', {
+                  {(user as any).updatedAt ? new Date((user as any).updatedAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                  })}
+                  }) : 'Not available'}
                 </dd>
               </div>
               <div>

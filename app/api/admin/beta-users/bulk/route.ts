@@ -65,9 +65,15 @@ export async function POST(request: NextRequest) {
       }
     } else if (action === 'remove_from_beta') {
       // Remove users from beta users
-      const betaUsers = emails 
-        ? await BetaUsers.find({ email: { $in: emails } })
-        : await BetaUsers.find({ userId: { $in: userIds } });
+      let betaUsers;
+      
+      if (emails) {
+        betaUsers = await BetaUsers.find({ email: { $in: emails } });
+      } else {
+        // Convert userIds to numbers for numeric userId search
+        const numericUserIds = userIds.map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
+        betaUsers = await BetaUsers.find({ userId: { $in: numericUserIds } });
+      }
 
       for (const betaUser of betaUsers) {
         try {

@@ -28,12 +28,19 @@ export async function GET(
       user = await User.findById(id).lean();
     } else {
       // Custom userId or email
-      user = await User.findOne({
-        $or: [
-          { userId: parseInt(id) },
+      const numericUserId = parseInt(id);
+      const searchCriteria: any = { email: id };
+      
+      // If id is numeric, also search by userId
+      if (!isNaN(numericUserId)) {
+        searchCriteria.$or = [
+          { userId: numericUserId },
           { email: id }
-        ]
-      }).lean();
+        ];
+        delete searchCriteria.email;
+      }
+      
+      user = await User.findOne(searchCriteria).lean();
     }
 
     if (!user) {

@@ -20,16 +20,26 @@ export async function GET(
 
     const { id } = await params;
 
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
-    }
-
     await connectDB();
 
-    const betaUser = await BetaUsers.findById(id)
-      .populate('waitListId', 'formResponses createdAt userWaitlistId')
-      .lean();
+    let betaUser;
+
+    // Check if ID is a MongoDB ObjectId or a numeric userId
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      betaUser = await BetaUsers.findById(id)
+        .populate('waitListId', 'formResponses createdAt userWaitlistId')
+        .lean();
+    } else {
+      // Try to parse as numeric userId
+      const userId = parseInt(id);
+      if (isNaN(userId)) {
+        return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+      }
+      
+      betaUser = await BetaUsers.findOne({ userId })
+        .populate('waitListId', 'formResponses createdAt userWaitlistId')
+        .lean();
+    }
 
     if (!betaUser) {
       return NextResponse.json({ error: 'Beta user not found' }, { status: 404 });
@@ -59,21 +69,33 @@ export async function PATCH(
     const { id } = await params;
     const updates = await request.json();
 
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
-    }
-
     await connectDB();
 
     // Remove fields that shouldn't be updated directly
     const { userId, waitListId, ...allowedUpdates } = updates;
 
-    const updatedBetaUser = await BetaUsers.findByIdAndUpdate(
-      id,
-      { $set: allowedUpdates },
-      { new: true, runValidators: true }
-    ).populate('waitListId', 'formResponses createdAt userWaitlistId');
+    let updatedBetaUser;
+
+    // Check if ID is a MongoDB ObjectId or a numeric userId
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      updatedBetaUser = await BetaUsers.findByIdAndUpdate(
+        id,
+        { $set: allowedUpdates },
+        { new: true, runValidators: true }
+      ).populate('waitListId', 'formResponses createdAt userWaitlistId');
+    } else {
+      // Try to parse as numeric userId
+      const userIdNum = parseInt(id);
+      if (isNaN(userIdNum)) {
+        return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+      }
+      
+      updatedBetaUser = await BetaUsers.findOneAndUpdate(
+        { userId: userIdNum },
+        { $set: allowedUpdates },
+        { new: true, runValidators: true }
+      ).populate('waitListId', 'formResponses createdAt userWaitlistId');
+    }
 
     if (!updatedBetaUser) {
       return NextResponse.json({ error: 'Beta user not found' }, { status: 404 });
@@ -107,15 +129,22 @@ export async function DELETE(
     const { searchParams } = new URL(request.url);
     const keepInWaitlist = searchParams.get('keepInWaitlist') === 'true';
 
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
-    }
-
     await connectDB();
 
-    // Find the beta user first to get their waitlist reference
-    const betaUser = await BetaUsers.findById(id).populate('waitListId');
+    let betaUser;
+
+    // Check if ID is a MongoDB ObjectId or a numeric userId
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      betaUser = await BetaUsers.findById(id).populate('waitListId');
+    } else {
+      // Try to parse as numeric userId
+      const userIdNum = parseInt(id);
+      if (isNaN(userIdNum)) {
+        return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+      }
+      
+      betaUser = await BetaUsers.findOne({ userId: userIdNum }).populate('waitListId');
+    }
     
     if (!betaUser) {
       return NextResponse.json({ error: 'Beta user not found' }, { status: 404 });
@@ -125,7 +154,7 @@ export async function DELETE(
     const waitListRecord = betaUser.waitListId;
 
     // Remove from beta users
-    await BetaUsers.findByIdAndDelete(id);
+    await BetaUsers.findByIdAndDelete(betaUser._id);
 
     let restoredToWaitlist = false;
 

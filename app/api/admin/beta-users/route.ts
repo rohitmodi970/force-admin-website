@@ -7,6 +7,7 @@ import BetaUsers from '@/models/Beta-Users';
 import WaitList from '@/models/WaitList';
 import { sendTemplatedEmail } from '@/utilities/mailService';
 import { EmailTemplate } from '@/utilities/mailService';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,14 +26,22 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     // Build query with search functionality
-    const query = search 
-      ? { 
-          $or: [
-            { email: { $regex: search, $options: 'i' } },
-            { userId: { $regex: search, $options: 'i' } }
-          ]
-        }
-      : {};
+    let query: any = {};
+    
+    if (search) {
+      const searchRegex = { $regex: search, $options: 'i' };
+      const searchCriteria: any[] = [
+        { email: searchRegex }
+      ];
+      
+      // If search is a number, also search by userId
+      const searchAsNumber = parseInt(search);
+      if (!isNaN(searchAsNumber)) {
+        searchCriteria.push({ userId: searchAsNumber });
+      }
+      
+      query.$or = searchCriteria;
+    }
 
     // Build sort object
     const sort: Record<string, 1 | -1> = {};
@@ -163,8 +172,6 @@ export async function POST(request: NextRequest) {
     await newBetaUser.save();
     // Populate the waitlist data for response
     await newBetaUser.populate('waitListId', 'formResponses createdAt userWaitlistId');
-    // // Remove the user from waitlist after successful beta user creation
-    //     await WaitList.findByIdAndDelete(waitListRecord._id);
     
     return NextResponse.json({
       message: 'User added to beta users successfully',

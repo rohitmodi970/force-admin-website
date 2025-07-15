@@ -30,18 +30,21 @@ export async function GET(request: NextRequest) {
     
     // Add search functionality
     if (search) {
-      query.$or = [
-        { email: { $regex: search, $options: 'i' } },
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { username: { $regex: search, $options: 'i' } }
+      const searchRegex = { $regex: search, $options: 'i' };
+      const searchCriteria: any[] = [
+        { email: searchRegex },
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { username: searchRegex }
       ];
       
       // Add userId search if search is a number
       const parsedSearch = parseInt(search);
       if (!isNaN(parsedSearch) && isFinite(parsedSearch)) {
-        query.$or.push({ userId: parsedSearch });
+        searchCriteria.push({ userId: parsedSearch });
       }
+      
+      query.$or = searchCriteria;
     }
 
     // Add filter conditions

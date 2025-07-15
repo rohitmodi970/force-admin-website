@@ -581,8 +581,8 @@ const BetaUsersPage = () => {
                     <div className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={selectedUsers.includes(user.userId)}
-                        onChange={(e) => handleSelectUser(user.userId, e.target.checked)}
+                        checked={selectedUsers.includes(String(user.userId))}
+                        onChange={(e) => handleSelectUser(String(user.userId), e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-4"
                       />
                       <div className="flex-shrink-0 h-10 w-10">
@@ -621,7 +621,7 @@ const BetaUsersPage = () => {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleViewUserDetails(user.userId)}
+                        onClick={() => handleViewUserDetails(String(user.userId))}
                         className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -631,7 +631,7 @@ const BetaUsersPage = () => {
                         View Details
                       </button>
                       <button
-                        onClick={() => handleViewOnboardingData(user.userId)}
+                        onClick={() => handleViewOnboardingData(String(user.userId))}
                         className="inline-flex items-center px-3 py-1 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -640,7 +640,7 @@ const BetaUsersPage = () => {
                         Onboarding
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.userId, user.email)}
+                        onClick={() => handleDeleteUser(String(user.userId), user.email)}
                         disabled={deleting === user._id}
                         className="inline-flex items-center px-3 py-1 border border-orange-300 shadow-sm text-sm leading-4 font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove from beta and restore to waitlist"
