@@ -47,7 +47,7 @@ export default withAuth(
     
     // Rate limiting check for login attempts (optional)
     if (req.nextUrl.pathname === '/admin/login' && req.method === 'POST') {
-      const clientIP = req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+      const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
       console.log("Login attempt from IP:", clientIP);
       // You can implement rate limiting logic here
     }
