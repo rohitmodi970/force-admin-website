@@ -35,8 +35,8 @@ function BackgroundEffects() {
 function Header() {
   return (
     <header className="mb-12 text-center">
-      <div className="inline-flex items-center justify-center w-24 h-24  mb-6 shadow-2xl">
-        <img src="/Logo 5.svg" alt="Force Company Logo" />
+      <div className="inline-flex items-center justify-center   mb-6 ">
+        <img src="/logo.svg" alt="Force Company Logo" />
       </div>
       <h1 className="text-5xl font-bold text-white mb-2">Force </h1>
       <p className="text-xl text-blue-200">Administrative Control Panel</p>

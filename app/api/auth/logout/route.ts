@@ -1,6 +1,6 @@
 // File: app/api/auth/logout/route.ts
 import { NextResponse } from 'next/server';
-import connectDB from '@/db/connectDB';
+import connectDB from '@/models/connectDB';
 import User from '@/models/User';
 
 export async function POST(request: Request) {

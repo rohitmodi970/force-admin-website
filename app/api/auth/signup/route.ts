@@ -98,8 +98,7 @@ export async function POST(request: NextRequest) {
     } catch (ipError) {
       console.warn('Failed to fetch IP from service:', ipError);
       // Fallback to basic IP detection
-      clientIP = request.ip || 
-                request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+      clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
                 request.headers.get('x-real-ip') || 
                 request.headers.get('cf-connecting-ip') || 
                 request.headers.get('x-client-ip') ||
@@ -144,7 +143,7 @@ export async function POST(request: NextRequest) {
     
     // Handle validation errors
     if (error instanceof z.ZodError) {
-      const errorMessages = error.errors.map(err => err.message);
+      const errorMessages = error.issues.map(err => err.message);
       return NextResponse.json(
         { 
           message: errorMessages[0] || 'Validation error',
