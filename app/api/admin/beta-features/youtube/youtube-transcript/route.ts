@@ -795,7 +795,7 @@ async function fetchTranscriptFromUrl(baseUrl: string, videoId: string, language
         if (!response.ok) throw new Error(`Transcript fetch failed: ${response.status}`);
         const transcriptXml = await response.text();
 
-        const lines = Array.from(transcriptXml.matchAll(/<text[^>]*start="([^"]*)"[^>]*dur="([^"]*)"[^>]*>(.*?)<\/text>/gs));
+        const lines = Array.from(transcriptXml.matchAll(/<text[^>]*start="([^"]*)"[^>]*dur="([^"]*)"[^>]*>(.*?)<\/text>/g));
         if (!lines || lines.length === 0) return null;
 
         const fullTranscript: TranscriptItem[] = lines.map(line => {
