@@ -1,10 +1,12 @@
+//app\admin\users\[id]\password\page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Key, ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
-const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
+const ChangePasswordPage = ({ params }: { params: Promise<{ id: string }> }) => {
+  const [userId, setUserId] = useState<string>('');
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -15,6 +17,13 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
+
+  // Unwrap the params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setUserId(resolvedParams.id);
+    });
+  }, [params]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,7 +64,7 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/users/${params.username}/password`, {
+      const response = await fetch(`/api/admin/users/${userId}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -71,7 +80,7 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
         setSuccess('Password updated successfully!');
         setFormData({ password: '', confirmPassword: '' });
         setTimeout(() => {
-          router.push(`/admin/users/${params.username}`);
+          router.push(`/admin/users/${userId}`);
         }, 2000);
       } else {
         setError(data.error || 'Failed to update password');
@@ -106,12 +115,17 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
 
   const passwordStrength = getPasswordStrength(formData.password);
 
+  // Show loading state while params are being resolved
+  if (!userId) {
+    return <div className="p-6">Loading...</div>;
+  }
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button
-          onClick={() => router.push(`/admin/users/${params.username}`)}
+          onClick={() => router.push(`/admin/users/${userId}`)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -121,7 +135,7 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
             <Key className="w-8 h-8" />
             Change Password
           </h1>
-          <p className="text-gray-600 mt-1">Update password for user: <span className="font-semibold">@{params.username}</span></p>
+          <p className="text-gray-600 mt-1">Update password for user: <span className="font-semibold">@{userId}</span></p>
         </div>
       </div>
 
@@ -268,7 +282,7 @@ const ChangePasswordPage = ({ params }: { params: { username: string } }) => {
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              onClick={() => router.push(`/admin/users/${params.username}`)}
+              onClick={() => router.push(`/admin/users/${userId}`)}
               className="px-6 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel

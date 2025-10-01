@@ -1,4 +1,4 @@
-// app/api/admin/miscellaneous/[id]/route.ts
+// app\api\admin\users\[id]\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/utilities/auth';
