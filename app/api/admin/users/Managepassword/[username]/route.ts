@@ -1,4 +1,4 @@
-// app/api/admin/users/[username]/route.ts
+// app\api\admin\users\Managepassword\[username]\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { Admin } from '@/models/AdminSchema';
 import connectDB from '@/models/connectDB';
@@ -6,11 +6,12 @@ import connectDB from '@/models/connectDB';
 // GET - Fetch single user by username
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
     await connectDB();
-    const user = await Admin.findOne({ username: params.username }).select('-password -sessionToken');
+    const { username } = await params;
+    const user = await Admin.findOne({ username }).select('-password -sessionToken');
     
     if (!user) {
       return NextResponse.json(
@@ -31,15 +32,16 @@ export async function GET(
 // PUT - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
     await connectDB();
+    const { username } = await params;
     const body = await request.json();
     const { username: newUsername, name, email, status } = body;
 
     // Find existing user
-    const existingUser = await Admin.findOne({ username: params.username });
+    const existingUser = await Admin.findOne({ username });
     if (!existingUser) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
@@ -48,7 +50,7 @@ export async function PUT(
     }
 
     // Check if new username already exists (if username is being changed)
-    if (newUsername && newUsername !== params.username) {
+    if (newUsername && newUsername !== username) {
       const usernameExists = await Admin.findOne({ username: newUsername });
       if (usernameExists) {
         return NextResponse.json(
@@ -70,7 +72,7 @@ export async function PUT(
     }
 
     const updatedUser = await Admin.findOneAndUpdate(
-      { username: params.username },
+      { username },
       { 
         ...(newUsername && { username: newUsername }),
         ...(name && { name }),
@@ -86,9 +88,9 @@ export async function PUT(
       message: 'User updated successfully'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to update user' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to update user' },
       { status: 500 }
     );
   }
@@ -97,12 +99,13 @@ export async function PUT(
 // DELETE - Delete user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
     await connectDB();
+    const { username } = await params;
     
-    const deletedUser = await Admin.findOneAndDelete({ username: params.username });
+    const deletedUser = await Admin.findOneAndDelete({ username });
     
     if (!deletedUser) {
       return NextResponse.json(
